@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const { body, query, validationResult } = require("express-validator");
 const { pool } = require("../db");
+const { redisClient } = require("../redis");
 const { publishTransaction } = require("../rabbitmq");
 const { authenticate } = require("../middleware/auth");
 
@@ -79,6 +80,17 @@ router.post(
         createdAt: newTransaction.created_at,
       });
 
+      // ── XÓA BỘ ĐỆM REDIS CỦA USER NÀY ĐỂ TRANG MỚI ĐƯỢC CẬP NHẬT GIAO DỊCH
+      try {
+        const keys = await redisClient.keys(`tx:${userId}:*`);
+        if (keys.length > 0) {
+          await redisClient.del(keys);
+          console.log(`[REDIS] Xóa ${keys.length} cache keys cũ của user ${userId} do có dữ liệu mới.`);
+        }
+      } catch (redisErr) {
+        console.error("Redis Cache Invalidation error:", redisErr);
+      }
+
       return res.status(201).json({
         message: "Giao dịch đã được tạo thành công",
         transaction: newTransaction,
@@ -149,18 +161,41 @@ router.get(
       : `SELECT COUNT(*) FROM transactions WHERE user_id = $1`;
     const countParams = type ? [userId, type] : [userId];
 
+    // ── KIỂM TRA REDIS CACHE TRƯỚC:
+    const cacheKey = `tx:${userId}:limit:${limit}:offset:${offset}:type:${type || 'all'}`;
     try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        console.log(`[REDIS] CACHE HIT! Trả về dữ liệu cực nhanh cho key: ${cacheKey}`);
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (redisErr) {
+      console.error("Redis get error:", redisErr);
+    }
+
+    try {
+      console.log(`[DB QUERY] CACHE MISS. Đang lấy dữ liệu từ PostgreSQL cho key: ${cacheKey}`);
       const [dataResult, countResult] = await Promise.all([
         pool.query(selectSQL, params),
         pool.query(countSQL, countParams),
       ]);
 
-      return res.json({
+      const responseData = {
         data:   dataResult.rows,
         total:  parseInt(countResult.rows[0].count),
         limit,
         offset,
-      });
+      };
+
+      // LƯU KẾT QUẢ VÀO REDIS CACHE TRONG 60 GIÂY
+      try {
+        await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+        console.log(`[REDIS] LƯU CACHE thành công cho key: ${cacheKey}`);
+      } catch (redisErr) {
+        console.error("Redis set error:", redisErr);
+      }
+
+      return res.json(responseData);
     } catch (err) {
       console.error("DB error (GET /transactions):", err.message);
       return res.status(500).json({ error: "Lỗi server", detail: err.message });

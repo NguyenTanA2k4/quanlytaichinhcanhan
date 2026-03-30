@@ -3,8 +3,10 @@ const express    = require("express");
 const cors       = require("cors");
 const morgan     = require("morgan");
 const { initDatabase, pool } = require("./db");
+const { connectRedis } = require("./redis");
 const { connectRabbitMQ, consumeAIResults } = require("./rabbitmq");
 const transactionRoutes = require("./routes/transactions");
+const authRoutes = require("./routes/auth");
 
 const app  = express();
 const PORT = process.env.PORT || 8001;
@@ -24,6 +26,7 @@ app.get("/health", (_req, res) => {
 });
 
 // ── Routes ────────────────────────────────────────────────
+app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 
 // ── 404 fallback ──────────────────────────────────────────
@@ -42,6 +45,9 @@ async function start() {
   try {
     // 1. Khởi tạo DB (tạo bảng nếu chưa có)
     await initDatabase();
+
+    // 1.5. Kết nối Redis
+    await connectRedis();
 
     // 2. Kết nối RabbitMQ (không chặn nếu MQ chưa sẵn sàng)
     await connectRabbitMQ();

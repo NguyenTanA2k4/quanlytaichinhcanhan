@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.classifier import predict_category, LABELS
 from app.consumer import start_consumer_thread
+from app.routers import ai
 
 # ── Logging setup ─────────────────────────────────────────
 logging.basicConfig(
@@ -48,6 +49,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(ai.router, prefix="/ai", tags=["AI Extra"])
 
 
 # ══════════════════════════════════════════════════════════════════

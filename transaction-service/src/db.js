@@ -30,6 +30,13 @@ pool.on("error", (err) => {
  */
 async function initDatabase() {
   const createTableSQL = `
+    CREATE TABLE IF NOT EXISTS users (
+      id            SERIAL PRIMARY KEY,
+      username      VARCHAR(100) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS transactions (
       id          SERIAL PRIMARY KEY,
       user_id     VARCHAR(128)   NOT NULL,

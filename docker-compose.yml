@@ -50,6 +50,20 @@ services:
     networks:
       - finance-net
 
+  redis:
+    image: redis:7-alpine
+    container_name: finance-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-net
+
   # ── Application Services ───────────────────────────────────
 
   api-gateway:
@@ -88,12 +102,15 @@ services:
       POSTGRES_PORT: 5432
       JWT_SECRET: ${JWT_SECRET}
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     ports:
       - "8001:8001"
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - finance-net

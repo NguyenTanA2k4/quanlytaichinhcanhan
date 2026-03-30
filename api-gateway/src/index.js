@@ -128,6 +128,14 @@ app.use(
   })
 );
 
+// ── Route: /api/auth  →  transaction-service ──────────────
+app.use(
+  "/api/auth",
+  makeProxy(cfg.TRANSACTION_SERVICE_URL, {
+    "^/api/auth": "/api/auth",
+  })
+);
+
 // ── Route: /api/ai  →  ai-service ─────────────────────────
 app.use(
   "/api/ai",

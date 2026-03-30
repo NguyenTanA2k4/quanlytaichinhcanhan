@@ -9,10 +9,12 @@ FROM python:3.9-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# 2. Cài các build dependencies (một số gói scikit-learn cần gcc)
+# 2. Cài các build dependencies và Tesseract OCR (Nhận diện chữ gốc tiếng Việt)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         gcc \
         g++ \
+        tesseract-ocr \
+        tesseract-ocr-vie \
     && rm -rf /var/lib/apt/lists/*
 
 # 3. Tạo group và user không có quyền root
