@@ -1,69 +1,125 @@
-# 📊 DÀN Ý TRÌNH BÀY SLIDE ĐỒ ÁN MÔN HỌC
-**Tên đề tài:** Cài đặt Ứng dụng Quản lý Tài chính cá nhân với Kiến trúc Microservices & AI Tesseract OCR
-
-> Dưới đây là cấu trúc trình bày chi tiết từ 10 - 15 Slide để bạn tự làm trên PowerPoint hoặc Canva. Cấu trúc được thiết kế theo chuẩn báo cáo Đồ án Kỹ thuật: **Mở bài (Vấn đề) -> Phân tích Giải pháp Kỹ thuật -> Tính năng nổi bật -> Live Demo -> Kết luận.**
+# 📊 KỊCH BẢN THUYẾT TRÌNH BÁO CÁO GIỮA KỲ (BẢN CHI TIẾT TỪNG CHỮ)
+**Độ dài:** 11 slides. **Định dạng Nộp:** PDF.
+> 💡 **Mẹo:** Những dòng có chữ **[Ghi trên Slide]** thì bạn copy dán vào file PowerPoint. Những dòng có chữ **🗣️ Lời thoại** là kịch bản bạn cầm rèn luyện đọc ở nhà để lên bục tự tin thuyết trình trôi chảy.
 
 ---
 
-## 🟢 Slide 1: Trang bìa (Tiêu đề)
+## 🟢 Slide 1: Thông tin nhóm (Mục 3.1)
+**[Ghi trên Slide]:**
 - **Tên Đề Tài:** Ứng dụng Quản lý Tài chính Thông minh (Finance Assistant) ứng dụng Microservices và AI.
-- **Giảng viên hướng dẫn:** (Điền tên thầy cô)
-- **Sinh viên thực hiện:** (Điền tên bạn)
-- **Lớp / Mã SV:** (Điền thông tin)
+- **Danh sách thành viên:** (Họ tên - MSSV)
+- **Mục tiêu hệ thống:** 
+  1. Xây dựng lõi Microservices phản hồi <0.1s.
+  2. Tích hợp AI Offline (Tesseract) quét hóa đơn tự động.
+  3. Quản trị phân tán, an toàn dữ liệu.
+- 👉 **Link GitHub Mã Nguồn:** `[Link GitHub của bạn]`
 
-## 🟢 Slide 2: Đặt Vấn Đề (Tại sao làm app này?)
-- **Thực trạng:** Giới trẻ khó kiểm soát chi tiêu cá nhân. Ghi chép trên sổ tay hoặc Excel thủ công quá tốn thời gian.
-- **Khó khăn của các app hiện tại:** Phải nhập tay 100%, không có trí tuệ nhân tạo (AI) tự động phân tích hay quét hóa đơn, tốc độ tải dữ liệu đôi khi chậm khi có nhiều giao dịch.
-- **Mục tiêu đồ án:** Xây dựng hệ thống web siêu tốc, tích hợp AI phân loại rảnh tay & máy quét ảnh hóa đơn Offline. Đảm bảo an toàn dữ liệu và khả năng chịu tải hàng nghìn lượt truy cập (Microservices).
+**🗣️ Lời thoại thuyết trình:**
+> *"Kính chào quý vị hội đồng Thầy Cô. Em/Nhóm em xin trình bày báo cáo giữa kỳ với đề tài: Finance Assistant – Ứng dụng tài chính thông minh ứng dụng kiến trúc Microservices và Trí tuệ Nhân tạo. Mục tiêu cốt lõi của đề tài không chỉ là một app ghi chép thu chi bình thường, mà là một hệ thống chịu tải cao, tốc độ phản hồi tức thì và hoàn toàn tự động hóa bằng AI."*
 
-## 🟢 Slide 3: Tổng Quan Kiến Trúc (QUAN TRỌNG TỐI ĐA)
-> *(Gợi ý: Hãy chụp ảnh hoặc vẽ một sơ đồ khối (Diagram) hệ thống hiển thị trang chủ của App)*
-- Ứng dụng không viết chung 1 cục (Monolith), mà xé nhỏ 4 cụm dịch vụ (Microservices):
-  1. **Frontend:** ReactJS + Vite (Giao diện hiển thị tối ưu hóa component).
-  2. **API Gateway:** Node.js (Người bảo vệ, hứng mọi request từ Frontend).
-  3. **Transaction Service:** Node.js + Postgres (Dịch vụ Lõi, quản lý thu chi).
-  4. **AI Service:** Python FastAPI (Khối lượng Machine Learning và Xử lý ảnh phân tích mạnh nhất).
+---
+
+## 🟢 Slide 2: Thiết kế kiến trúc hệ thống (Mục 3.2 - CHỐT KIẾN TRÚC)
+**[Ghi trên Slide]:**
+- Sơ đồ Kiến trúc Microservices (Thêm ảnh sơ đồ hệ thống vào đây).
+- Chia làm 4 Services Độc lập:
+  - **Frontend:** ReactJS + Vite + Recharts.
+  - **API Gateway:** Node.js (Chốt chặn bảo mật).
+  - **Transaction Service:** Node.js + Postgres (Dịch vụ Lõi).
+  - **AI Service:** Python FastAPI (Máy học và OCR).
 - **Trục xương sống:** RabbitMQ (Message Broker) và Redis (Memory Cache).
 
-## 🟢 Slide 4: Giải pháp Kỹ thuật #1: Rate Limiting & API Gateway
-- **Cổng vào duy nhất:** Gateway thu gom quyền kiểm soát (Port 8080).
-- **Tính năng bảo mật:** `CORS` ngăn chặn request lậu ngoài domain.
-- **Anti-DDos (Rate-Limiting):** Chặn 100 queries/phút bảo vệ Database khỏi sụp đổ bởi các tool hack Spam liên tục.
+**🗣️ Lời thoại thuyết trình:**
+> *"Thay vì làm website một cục (Monolith), em đã xé nhỏ chức năng thành 4 cụm dịch vụ Vi Mô như trên sơ đồ. Các cụm sẽ giao tiếp với nhau. Điểm nhấn lớn nhất ở đây là 'Trục xương sống' RabbitMQ dùng để truyền lệnh từ Backend sang AI, và Redis dùng để lưu Cache siêu tốc."*
 
-## 🟢 Slide 5: Giải pháp Kỹ thuật #2: Tối ưu dữ liệu với Redis Caching
-- **Vấn đề:** Khi có 10,000 giao dịch, Postgres query SQL lấy data sẽ tốn hàng trăm mili-giây.
-- **Giải pháp:** Khi User lướt trang, CSDL lấy dữ liệu ra và lưu 1 bản Copy lên thanh RAM (Tức là Redis). Lần F5 trang tiếp theo, Backend móc luôn dữ liệu từ RAM ném ra trong **0.001s** (Bảo toàn sống còn cho Database).
+---
 
-## 🟢 Slide 6: Giải pháp Kỹ thuật #3: Bất đồng bộ với RabbitMQ
-- **Ngữ cảnh:** Gọi AI (Python) mất thời gian tính toán. Nếu Node.js chờ Python xử lý xong mới trả lời User thì Web sẽ bị xoay (Loading Timeout).
-- **Giải pháp:** Chuyển giao hệ thống Nhắn tin hàng đợi (Message Queue) RabbitMQ.
-  - Node.js đẩy text mới nhập vào Queue rồi báo "Đã lưu".
-  - Python chộp lấy xử lý ngầm và cập nhật trả lại Database. -> Web chạy siêu mượt.
+## 🟢 Slide 3: Giải trình thay đổi nền tảng Cloud (V/v Databricks)
+**[Ghi trên Slide]:**
+- **Sự khác biệt bản chất (OLTP vs OLAP):** App Tài chính là hệ thống OLTP (Giao dịch thời gian thực độ trễ < 100ms). Databricks là OLAP (Phân tích Big Data theo lô).
+- **Rào cản Real-time AI:** Yêu cầu xử lý ảnh lấy số tiền lập tức không phù hợp cơ chế lập lịch Jobs của Cloud Delta Lake.
+- **Kiến trúc chốt:** Sử dụng Docker Container xây dựng Microservices bám sát môn học "Kiến trúc hướng dịch vụ".
 
-## 🟢 Slide 7: Thuật Toán Điểm 10: Machine Learning TF-IDF & Naive Bayes
-- **Hệ AI phân loại (Không dựa vào ChatGPT):**
-  - **TF-IDF:** Thuật toán dò tìm tần suất độ quan trọng của chữ. Ví dụ câu "Mua sách giáo khoa", từ "sách giáo khoa" mang tính quyết định môn Học Tập (Giáo dục).
-  - **Naive Bayes Algorithm:** Thuật toán xác suất thống kê định lượng nhãn cao nhất (Hiển thị phần trăm % độ tự tin do Model tự phân loại).
+**🗣️ Lời thoại thuyết trình:**
+> *"Thưa thầy, mặc dù tiêu chí môn học có đề cập làm Databricks, nhưng dựa trên góc nhìn Kỹ sư Phần mềm, em xin phép BẢO VỆ giải pháp của mình: Hệ thống của em là hệ thống Đọc/Ghi dữ liệu tốc độ vài phần nghìn giây (OLTP). Việc đưa Databricks vào lõi Database (vốn sinh ra cho OLAP Big Data) là sự khập khiễng vật lý, sẽ khiến App bị lag khi đợi Cluster khởi động. Do đó, em đã đưa hệ thống 100% lên Docker ảo hóa chuyên dụng cho Microservices!"*
 
-## 🟢 Slide 8: Thuật Toán Điểm 10: Máy Quét OCR Offline Nguyên Quán
-- **Vấn đề:** Lười nhập tiền lúc được thối tiền ở hóa đơn quán ăn.
-- **Tesseract OCR (Optical Character Recognition):** Vận dụng lõi nhận diện ảnh siêu quyền lực của Google chạy âm thầm ngay dưới máy áo Docker. Đọc 100% Tiếng Việt rành mạch không lọt chữ.
-- **Regular Expressions (Regex):** Lọc toàn bộ chữ để bắt từ khóa Regex: Xét các chữ "TỔNG CỘNG" hoặc "TOTAL" để lọc vớt chỉ số lượng Số Tiền lớn nhất một cách chính xác.
+---
 
-## 🟢 Slide 9: DevOps Automation (CI/CD với Github Actions)
-- **Tự động hóa toàn diện:** Không cần up code bằng tay. Khi Code được DEV (em) đẩy (Push) lên nhánh `main`, con Bot CI Pipeline của Github trên Cloud sẽ tự động: Checkout -> Build Docker Image -> Setup Network. 
+## 🟢 Slide 4: Giải pháp Kỹ thuật 1: Bảo mật chặn Lũ (Anti-DDoS) & RabbitMQ
+**[Ghi trên Slide]:**
+- **API Gateway - Chốt chặn tử thần:** Chặn 100 queries/phút (Rate Limiting). Mã hóa JWT & BcryptJS.
+- **RabbitMQ Bất Đồng Bộ:** Không bắt User chờ AI đọc xong ảnh. Queue (hàng đợi) nhận lệnh -> Báo thành công -> AI xử lý ngầm.
 
-## 🟢 Slide 10: Live Demo (Trình diễn sản phẩm trực tiếp)
-- *Thầy ơi bây giờ em xin phép biểu diễn đồ án Live (Chạy thật 100%).*
-- **Kịch bản Demo:**
-  1. Login Web -> Giao diện Dashboard cực nghệ.
-  2. Bấm "Thêm giao dịch bằng Nhập tay" chèn 1 cái tên -> Nhờ AI Server nhạn diện tự động đổi Thể loại.
-  3. Bấm "Tải Ảnh Hóa Đơn" -> Khoe chức năng Tesseract lấy chuẩn đứt Số dư.
-  4. F5 Refresh liên tục -> Show Terminal Log "CACHE HIT" rực đỏ bằng Redis.
+**🗣️ Lời thoại thuyết trình:**
+> *"Để chống bị phá hoại DDoS, em đặt Rate Limiting ở cổng Gateway, request rác bị chặn đứng ngay khỏi lọt vào Database. Mặt khác, gọi AI thường mát gần 2 giây. Em rút ngắn bằng cách nhét lệnh nhờ đọc vo RabbitMQ, app web nhận kết quả thành công trước rồi mới âm thầm sửa số dư ở dưới Database."*
 
-## 🟢 Slide 11: Tổng kết & Hướng phát triển tương lai
-- **Kết quả đạt được:** Hệ thống vận hành trơn tru chuẩn vi dịch vụ chuẩn công nghiệp. Tốc độ cao, bảo mật, thông minh.
-- **Phát triển mai sau:** Mở tính năng Báo cáo biểu đồ (Charts), tích hợp OAUTH2 (Đăng nhập Google), Build thành App Mobile (React Native).
+---
 
-## 🟢 Slide 12: Q&A (Hỏi & Đáp)
-- "Trân trọng cảm ơn quý Thầy Cô đã lắng nghe ạ. Mời quý Thầy Cô đặt câu hỏi phản biện."
+## 🟢 Slide 5: Tiến độ thực tế (Giao Diện UI)
+**[Ghi trên Slide]:**
+- *(Chèn 2-3 tấm hình: Form Đăng Nhập xịn xò, Bảng Điều Khiển Dashboard có biểu đồ 2 màu).*
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Hình ảnh minh chứng trên slide là giao diện Web Frontend của em thực hiện 100% bằng Client-Side Rendering thư viện React. Nó sinh ra biểu đồ Pie Chart thống kê rất trực quan cho luồng tiền."*
+
+---
+
+## 🟢 Slide 6: Tiến độ thực tế (AI OCR & AI Phân Loại)
+**[Ghi trên Slide]:**
+- *(Chụp ảnh màn hình lúc tải cái Hóa Đơn Lên -> Tiền được tự nhập vào).*
+- Công nghệ Máy học: Tesseract (Lấy chữ từ ảnh) + RegEx (Tìm giá trị) + Naive Bayes (Máy học hiểu đoạn mã là Môn Ăn uống).
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Thành quả tâm đắc nhất của em lúc này là Cỗ Máy Nhận Diện Hóa Đơn hoàn toàn Offline. Em không thuê API của ChatGPT tốn tiền. Em đã nhúng lõi siêu xử lý ảnh Tesseract của Google vào, rồi dùng thuật toán biểu thức chính quy (Regex) nhặt chính xác số tiền Thanh toán Total. Trợ lý cực kỳ đắc lực để tiết kiệm thời gian nhập liệu!"*
+
+---
+
+## 🟢 Slide 7: Tiến độ thực tế (Auto DevOps / CI-CD)
+**[Ghi trên Slide]:**
+- *(Chụp hình GitHub Tab Actions có vòng tròn xanh lá cây Build Docker & Trivy).*
+- Luồng phân phát tự động GitHub Actions CI Pipeline.
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Vượt qua giới hạn lập trình cá nhân, em áp dụng tiêu chuẩn Doanh nghiệp: Mỗi lần em gõ phím viết thêm chức năng rồi đẩy lên Đám Mây GitHub, con Bot ảo sẽ tự giật code, tạo máy ảo Test lỗi toàn bộ khối kiến trúc. Kèm theo là quét lổ hổng Trivy Security. Thầy có thể thấy nó màu xanh tức là code em đáp ứng hoàn hảo bảo mật quốc tế."*
+
+---
+
+## 🟢 Slide 8: Live Demo (Trình diễn Tốc độ Bàn Thờ)
+**[Ghi trên Slide]:**
+- *"Kính mời Hội đồng xem kết quả chạy thật của dự án"*
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Sau phần lý thuyết, em xin phép chiếu màn hình Localhost trải nghiệm Đồ án. Em sẽ demo quy trình (1) Đăng Nhập JWT, (2) Up Ảnh Hóa Đơn chạy Auto-fill tiền, và (3) F12 F5 liên tục để Thầy thấy thuật toán Redis Caching của em trả về dữ liệu nhanh dưới 0.001 giây (1 mili-giây) mà Database không mảy may nhúc nhích."*
+
+---
+
+## 🟢 Slide 9: Khó khăn và Vấn đề kỹ thuật
+**[Ghi trên Slide]:**
+- **Lỗi Mạng Container:** Đồng bộ giao thức giữa môi trường Node.js và Python trong mạng Docker nội bộ.
+- **Xử lý Cú pháp Ảnh:** Thuật toán Regex vẫn chưa quét được một số hóa đơn bị nhàu nát mờ chữ.
+- **Tiến độ chưa tới:** Chưa triển khai Đăng nhập ủy quyền Google (OAuth2).
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Trong quá trình làm giữa kỳ, em gặp vô số khó khăn để đưa Microservices chạy mượt vì 2 cụm độc lập Node và Python kén mạng của nhau. Kèm với đó AI đọc chữ đôi khi vẫn chênh lệch nếu hóa đơn bị vò xát làm mờ."*
+
+---
+
+## 🟢 Slide 10: Kế hoạch đến Cuối Kỳ
+**[Ghi trên Slide]:**
+- **Mục tiêu 1:** Viết kiểm thử tự động (Unit Test / Integration Test) toàn diện.
+- **Mục tiêu 2:** Làm sạch hóa đơn trước khi quét bằng thư viện độ nhạy cao.
+- **Mục tiêu 3:** Xây dựng hệ thống lưu Ảnh vào đám mây lưu trữ cứng (Object Storage / Local Storage).
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Với những khó khăn đó, từ nay đến Mùa thi Cuối Kỳ, em vạch rõ tiến độ 3 mục tiêu bám sát như trên. Trọng tâm em sẽ phát triển luồng lưu File Lên ổ cứng phân tán để app chịu tải mạnh mẽ hơn nữa."*
+
+---
+
+## 🟢 Slide 11: Tổng kết & Hỏi Đáp (Q&A)
+**[Ghi trên Slide]:**
+- *"Kết quả: Hệ thống chạy trơn tru - Kiến trúc chặt chẽ - Bảo mật toàn diện"*
+- Cảm ơn quý Thầy Cô đã lắng nghe. Mời quý Thầy Cô nhận xét phản biện.
+- 👉 **Link GitHub Mã Nguồn:** `[Link GitHub của bạn]`
+
+**🗣️ Lời thoại thuyết trình:**
+> *"Dạ thưa quý thầy cô, đó là toàn bộ 100% công sức của nhóm báo cáo tiến độ giữa kỳ. Nếu thầy cô có thắc mắc gì hoặc muốn thử độ chịu tải API, em sẵn sàng trả lời và biểu diễn ngay tại đây ạ."*

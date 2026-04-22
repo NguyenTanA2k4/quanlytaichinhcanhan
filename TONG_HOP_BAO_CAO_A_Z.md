@@ -48,7 +48,16 @@ Dự án được thiết kế theo kiến trúc **Microservices (Dịch vụ vi
 
 ### 💡 Câu Hỏi Điểm Mười 6: Tự động Hóa Code (Auto DevOps) GitHub Actions là sao?
 - Thay vì nén thư mục gửi lên máy chủ cài rườm rà.
-- Em tạo file cài đặt luồng chạy `.github/workflows/ci.yml`. Mỗi khi Dev viết code xong, push lên Branch `main`. Máy chủ Github ở Mỹ tự tải code mới xuống, tự động Build lại nguyên khung hệ thống Docker xem có bị sập ở bước nào không (Test Integration Pipeline). Nếu xanh lè thì chứng tỏ Code sạch, sẵn sàng giao máy ảo cho khách hàng.
+- Em tạo file cài đặt luồng chạy `.github/workflows/ci.yml`. Mỗi khi Dev viết code xong, push lên Branch `main`. Máy chủ Github ở Mỹ tự tải code mới xuống, tự động Build lại nguyên khung hệ thống Docker xem có bị sập ở bước nào không (Test Integration Pipeline). Đặc biệt em ứng dụng **Trivy File System Scanner** để rà soát điểm yếu mã nguồn. Nếu xanh lè thì chứng tỏ Code sạch, an toàn 100%.
+
+### 💡 Câu Hỏi Điểm Mười 7: Hệ thống bảo mật người dùng (Auth) hoạt động như nào?
+- Hệ thống áp dụng công cụ băm mật khẩu `BcryptJS`. Mật khẩu của người dùng khi nhập vào sẽ bị "xay nát" thành 1 chuỗi ký tự hỗn độn trước khi cất vào PostgreSQL. Thậm chí quản trị viên (DBA) có nhìn trộm DB cũng không thể dịch ngược ra mật khẩu gốc.
+- Về phiên đăng nhập, em dùng **JSON Web Token (JWT)**. Mỗi khi đăng nhập thành công, Server ký 1 tấm vé (Token) giao cho Frontend giữ. Sau đó Frontend kẹp tấm vé này vào mọi Request (Hóa đơn, lấy danh sách). Backend kiểm tra chữ ký chuẩn mới cho phép lấy dữ liệu của chính người đó. Đảm bảo dữ liệu Private (Riêng tư 100%).
+
+### 💡 Câu Hỏi Điểm Mười 8: Vẽ Biểu đồ và Xuất file Excel báo cáo làm sao Server chịu nổi?
+- **Trả lời:** Chìa khóa ở đây là **Client-Side Rendering (Xử lý tại trạm khách)**.
+- Thay vì bắt Server Backend (Node.js) phải ngồi cộng trừ nhân chia và nặn ra file Excel (Rất tốn CPU, nếu 10,000 người tải cùng lúc Server sẽ sập).
+- Em đẩy toàn bộ dữ liệu thô (.JSON) về Frontend. Trình duyệt mạng (Chrome/Edge) của chính người dùng sẽ dùng thư viện `Recharts` để vẽ Biểu Đồ và dùng `react-csv` để tự gom nhóm dữ liệu tạo ra file `.csv` ngay trên máy của họ. Phương pháp này giảm tải 100% CPU trên Server và ứng dụng chạy siêu mượt!
 
 ---
 

@@ -2,6 +2,13 @@
 
 Dự án đồ án môn học **Kiến trúc hướng dịch vụ & Điện toán đám mây** sử dụng kiến trúc microservices.
 
+## 🌟 Tính Năng Mới (Phiên Bản V2)
+- **Hệ Thống Xác Thực (Auth):** Tích hợp Đăng nhập/Đăng ký an toàn bảo mật nhiều lớp với `JWT` và băm mật khẩu `BcryptJS`.
+- **Trí Tuệ Nhân Tạo & Máy Quét Hóa Đơn:** Trích xuất tự động số tiền từ hình chụp bằng `Tesseract OCR` 100% Offline. Phân loại danh mục tự động bằng Machine Learning (`scikit-learn`).
+- **Bộ Nhớ Đệm Siêu Tốc (Redis Caching):** Giảm tải cho Database, Load vạn giao dịch chỉ mất 0.001s nhờ thuật toán Cache trực tiếp trên RAM.
+- **Biểu Đồ & Xuất Báo Cáo:** Sử dụng thư viện `Recharts` để vẽ biểu đồ trực quan, và dùng `react-csv` để One-click tải báo cáo Excel xử lý ngầm tại Frontend (Giảm tải Server).
+- **Auto DevOps:** Hệ thống tự động kiểm thử và quét rà soát lỗ hổng bảo mật toàn điện bằng `Trivy` tích hợp trên GitHub Actions.
+
 ## Kiến trúc tổng quan
 
 ```
