@@ -7,8 +7,61 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
+  # ══════════════════════════════════════════════════════════
+  #  JOB 1: Unit Tests – Transaction Service (Node.js)
+  # ══════════════════════════════════════════════════════════
+  test-transaction:
+    runs-on: ubuntu-latest
+    name: 🧪 Test Transaction Service
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: 📦 Install dependencies
+      working-directory: ./transaction-service
+      run: npm install
+
+    - name: 🧪 Run Unit Tests
+      working-directory: ./transaction-service
+      run: node tests/test_unit.js
+
+  # ══════════════════════════════════════════════════════════
+  #  JOB 2: Unit Tests – AI Service (Python)
+  # ══════════════════════════════════════════════════════════
+  test-ai:
+    runs-on: ubuntu-latest
+    name: 🧪 Test AI Service
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install dependencies
+      working-directory: ./ai-service
+      run: pip install scikit-learn
+
+    - name: 🧪 Run Unit Tests
+      working-directory: ./ai-service
+      run: python tests/test_unit.py
+
+  # ══════════════════════════════════════════════════════════
+  #  JOB 3: Docker Build + Security Scan
+  # ══════════════════════════════════════════════════════════
   build:
     runs-on: ubuntu-latest
+    name: 🏗️ Build & Security Scan
+    needs: [test-transaction, test-ai]
 
     steps:
     - name: 📥 Checkout repository
@@ -29,7 +82,7 @@ jobs:
     - name: 🏗️ Build Frontend Image
       run: docker compose build frontend
 
-    - name: ✅ Run Security Scan (Trivy)
+    - name: 🛡️ Run Security Scan (Trivy)
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
