@@ -235,14 +235,14 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status} OCR failed. Kiểm tra AI Service`);
       const data = await res.json();
       
-      setForm({
-        ...form,
-        amount: data.amount ? data.amount : form.amount,
-        description: "Từ hóa đơn OCR",
-      });
-      
       if (data.amount > 0) {
-        alert(`📸 Tuyệt vời! AI Tesseract đã moi được số tiền: ${formatVND(data.amount)} từ ảnh hóa đơn!`);
+        setForm({
+          amount: data.amount,
+          type: data.type || "expense",
+          category: data.category && categories.includes(data.category) ? data.category : form.category,
+          description: data.description || "Từ hóa đơn OCR",
+        });
+        alert(`🤖 Gemini AI đã đọc thành công!\n💰 Số tiền: ${formatVND(data.amount)}\n📂 Danh mục: ${data.category || "Khác"}\n📝 Mô tả: ${data.description || "Từ hóa đơn OCR"}`);
       } else {
         alert(`📸 AI đã quét xong nhưng không tìm thấy số tiền rõ ràng. Bạn chịu khó nhập tay nhé!`);
       }
@@ -342,9 +342,9 @@ export default function App() {
             
             {/* Box Upload Hóa Đơn */}
             <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#166534' }}>📸 Quét Hóa Đơn Tự Động (Tesseract OCR)</h3>
+              <h3 style={{ margin: '0 0 10px 0', color: '#166534' }}>🤖 Quét Hóa Đơn Tự Động (Gemini AI Vision)</h3>
               <p style={{ margin: '0 0 10px 0', fontSize: '0.9em', color: '#15803d' }}>
-                Tải ảnh hóa đơn lên, AI <b>Offline</b> sẽ tự đọc và bóc tách số tổng tiền.
+                Tải ảnh hóa đơn lên, AI <b>Gemini</b> sẽ tự đọc số tiền, loại và danh mục.
               </p>
               <input 
                 type="file" 

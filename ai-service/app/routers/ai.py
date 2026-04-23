@@ -7,11 +7,20 @@ import re
 import io
 from PIL import Image
 import pytesseract
+import google.generativeai as genai
 
 router = APIRouter()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 TRANSACTION_SERVICE_URL = os.getenv("TRANSACTION_SERVICE_URL", "http://transaction-service:8001")
+
+# Configure Gemini if the key is provided
+if OPENAI_API_KEY:
+    try:
+        genai.configure(api_key=OPENAI_API_KEY)
+        print("Gemini API configured successfully.")
+    except Exception as e:
+        print(f"Failed to configure Gemini: {e}")
 
 
 class AnalyzeRequest(BaseModel):
@@ -66,57 +75,108 @@ async def analyze_finances(payload: AnalyzeRequest):
 class OCRResponse(BaseModel):
     amount: int
     text: str
+    category: str = ""
+    type: str = "expense"
+    description: str = ""
 
 
 @router.post("/ocr", response_model=OCRResponse)
 async def scan_receipt(file: UploadFile = File(...)):
-    """Trích xuất văn bản hóa đơn bằng Tesseract OCR và dùng Regex tìm Tổng Tiền."""
+    """Trích xuất Tổng Tiền + Danh mục + Loại từ ảnh hóa đơn bằng Google Gemini Vision AI."""
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Vui lòng tải lên file định dạng hình ảnh.")
 
     try:
-        # Đọc dữ liệu ảnh vào bộ nhớ RAM
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
-        
-        # Gọi Tesseract (lang=vie cho chữ tiếng Việt)
-        raw_text = pytesseract.image_to_string(image, lang='vie')
-        
-        # Dọn dẹp khoảng trắng dư thừa
-        clean_text = '\\n'.join([line.strip() for line in raw_text.splitlines() if line.strip()])
-        
-        # ─── THUẬT TOÁN TÌM KIẾM "TỔNG SỐ TIỀN" (Regex) ───
-        amount = 0
-        # Tìm các chuỗi kiểu "Tổng cộng 150.000" hoặc "Total: 150,000"
-        pattern = re.compile(r'(?i)(tổng cộng|tổng|total|thanh toán|cộng)[\s:]*([\d\.\,]+)\b')
-        matches = pattern.finditer(clean_text)
-        
-        best_match = 0
-        for m in matches:
-            num_str = m.group(2).replace('.', '').replace(',', '')
-            if num_str.isdigit():
-                val = int(num_str)
-                if val > best_match:
-                    best_match = val
-                    
-        if best_match > 0:
-            amount = best_match
-        else:
-            # Nếu không tìm thấy chữ "tổng", rà quét toàn văn bản lấy số tiền to nhất trên 1000.
-            all_nums = re.findall(r'\b([\d\.\,]{4,})\b', clean_text)
-            max_num = 0
-            for num_str in all_nums:
-                c_num = num_str.replace('.', '').replace(',', '')
-                if c_num.isdigit():
-                    val = int(c_num)
-                    if val > max_num:
-                        max_num = val
-            amount = max_num
-            
-        return OCRResponse(amount=amount, text=clean_text[:500])
-        
+
+        if not OPENAI_API_KEY:
+            raise HTTPException(status_code=500, detail="API Key chưa được cấu hình.")
+
+        # Model names lấy từ API list_models (đã kiểm chứng hoạt động)
+        MODEL_CANDIDATES = [
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+            'gemini-2.5-flash',
+        ]
+
+        prompt = (
+            "Bạn là chuyên gia kế toán Việt Nam. Đọc hóa đơn/biên lai trong ảnh này.\n"
+            "Trả về CHÍNH XÁC theo format sau (mỗi dòng một giá trị, không thêm gì khác):\n"
+            "AMOUNT:số_tiền_nguyên\n"
+            "TYPE:expense hoặc income\n"
+            "CATEGORY:danh_mục\n"
+            "DESC:mô_tả_ngắn\n\n"
+            "QUY TẮC SỐ TIỀN:\n"
+            "- '70 triệu VNĐ' → AMOUNT:70000000\n"
+            "- '150k' hoặc '150 nghìn' → AMOUNT:150000\n"
+            "- '1.500.000' → AMOUNT:1500000\n"
+            "- Luôn quy đổi thành số nguyên đầy đủ, không dấu chấm/phẩy\n\n"
+            "QUY TẮC DANH MỤC (chọn 1 trong các danh mục sau):\n"
+            "Ăn uống, Hóa đơn, Di chuyển, Mua sắm, Sức khỏe, Giải trí, Giáo dục, Thu nhập, Khác\n\n"
+            "QUY TẮC LOẠI:\n"
+            "- Nếu là hóa đơn thanh toán/mua hàng → TYPE:expense\n"
+            "- Nếu là phiếu thu/lương → TYPE:income\n\n"
+            "VÍ DỤ KẾT QUẢ ĐÚNG:\n"
+            "AMOUNT:70000000\n"
+            "TYPE:expense\n"
+            "CATEGORY:Khác\n"
+            "DESC:Hóa đơn dịch vụ An Nam\n"
+        )
+
+        last_error = None
+        for model_name in MODEL_CANDIDATES:
+            try:
+                print(f"[OCR] Đang thử model: {model_name}")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content([prompt, image])
+                result_text = response.text.strip()
+                print(f"[OCR] Model {model_name} trả về:\n{result_text}")
+
+                # Parse kết quả có cấu trúc
+                amount = 0
+                tx_type = "expense"
+                category = "Khác"
+                description = "Từ hóa đơn OCR"
+
+                for line in result_text.split('\n'):
+                    line = line.strip()
+                    if line.upper().startswith('AMOUNT:'):
+                        num_str = re.sub(r'\D', '', line.split(':', 1)[1])
+                        if num_str.isdigit():
+                            amount = int(num_str)
+                    elif line.upper().startswith('TYPE:'):
+                        val = line.split(':', 1)[1].strip().lower()
+                        if val in ('income', 'expense'):
+                            tx_type = val
+                    elif line.upper().startswith('CATEGORY:'):
+                        category = line.split(':', 1)[1].strip()
+                    elif line.upper().startswith('DESC:'):
+                        description = line.split(':', 1)[1].strip()
+
+                if amount > 0:
+                    return OCRResponse(
+                        amount=amount,
+                        text=f"[Gemini AI] {amount:,} VNĐ",
+                        category=category,
+                        type=tx_type,
+                        description=description
+                    )
+                else:
+                    print(f"[OCR] Không tìm thấy số tiền, thử model tiếp...")
+                    continue
+
+            except Exception as e:
+                last_error = e
+                print(f"[OCR] Model {model_name} lỗi: {e}")
+                continue
+
+        error_msg = f"Không đọc được hóa đơn. Lỗi: {last_error}"
+        print(f"[OCR] {error_msg}")
+        return OCRResponse(amount=0, text=error_msg)
+
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"OCR Scan Error: {e}")
-        raise HTTPException(status_code=500, detail="Lỗi xử lý ảnh OCR.")
-
-
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý ảnh: {str(e)}")
